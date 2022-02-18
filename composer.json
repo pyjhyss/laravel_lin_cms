@@ -1,0 +1,19 @@
+{
+    "name": "pyjhyssc/aaa",
+    "description": "aaa",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "pyjhyssc",
+            "email": "pyjhyssc@qq.com"
+        }
+    ],
+    "require": {},
+    "require-dev": {},
+    "autoload": {
+        "psr-4": {
+            "Pyjhyssc\\Aaa\\": "src"
+        }
+    },
+    "extra": {}
+}
