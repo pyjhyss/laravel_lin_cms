@@ -1,6 +1,6 @@
 {
-    "name": "pyjhyssc/aaa",
-    "description": "aaa",
+    "name": "pyjhyssc/laravel_lin_cms",
+    "description": "laravel_lin_cms",
     "license": "MIT",
     "authors": [
         {
@@ -8,12 +8,21 @@
             "email": "pyjhyssc@qq.com"
         }
     ],
-    "require": {},
-    "require-dev": {},
+    "require": {
+        "laravel/framework": "^9.0",
+        "laravel/sanctum": "^2.14",
+        "pyjhyssc/laravel_api": "^1.0"
+    },
     "autoload": {
         "psr-4": {
-            "Pyjhyssc\\Aaa\\": "src"
+            "Lincms\\": "src"
         }
     },
-    "extra": {}
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Lincms\\LinServiceProvider"
+            ]
+        }
+    }
 }

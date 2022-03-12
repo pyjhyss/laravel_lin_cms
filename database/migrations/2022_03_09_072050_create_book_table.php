@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateBookTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('book', function (Blueprint $table) {
+            $table->integer('id', true);
+            $table->string('title', 50);
+            $table->string('author', 30)->nullable();
+            $table->string('summary', 1000)->nullable();
+            $table->string('image', 100)->nullable();
+            $table->softDeletes()->comment('软删除');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('book');
+    }
+}
