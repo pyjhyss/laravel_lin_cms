@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class CreateLinGroupPermissionTable extends Migration
@@ -20,7 +21,7 @@ class CreateLinGroupPermissionTable extends Migration
 
             $table->index(['group_id', 'permission_id'], 'group_id_permission_id');
         });
-        \Illuminate\Support\Facades\DB::statement("ALTER TABLE `lin_group_permission` COMMENT '角色权限表'");
+        DB::statement("ALTER TABLE `lin_group_permission` COMMENT '角色权限表'");
     }
 
     /**

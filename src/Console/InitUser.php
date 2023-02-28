@@ -3,6 +3,7 @@
 namespace Lincms\Console;
 
 use Illuminate\Console\Command;
+use Lincms\Models\LinUser;
 
 class InitUser extends Command
 {
@@ -20,20 +21,14 @@ class InitUser extends Command
      */
     protected $description = '初始化数据库';
 
-    /**
-     * Execute the console command.
-     *
-     * @return void
-     */
     public function handle()
     {
         $this->InitUser();
-
     }
 
     public function InitUser()
     {
-        \Lincms\Models\LinUser::query()->firstOrCreate(
+        LinUser::query()->firstOrCreate(
             ['id' => 1],
             [
                 'username' => 'root',
@@ -41,9 +36,8 @@ class InitUser extends Command
                 'avatar' => '',
                 'email' => 'admin@admin.com',
                 'password' => bcrypt('123456'),
-                'is_admin' => 1
+                'is_admin' => 1,
             ]
         );
     }
-
 }

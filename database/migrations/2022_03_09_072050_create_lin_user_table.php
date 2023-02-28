@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class CreateLinUserTable extends Migration
@@ -27,7 +28,7 @@ class CreateLinUserTable extends Migration
             $table->unique(['username', 'deleted_at'], 'username_del');
             $table->unique(['email', 'deleted_at'], 'email_del');
         });
-        \Illuminate\Support\Facades\DB::statement("ALTER TABLE `lin_user` COMMENT '用户表'");
+        DB::statement("ALTER TABLE `lin_user` COMMENT '用户表'");
     }
 
     /**

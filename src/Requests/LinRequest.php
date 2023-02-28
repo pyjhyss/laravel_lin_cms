@@ -2,40 +2,45 @@
 
 namespace Lincms\Requests;
 
-use Pyjhyssc\Requests\BaseRequest;
-
-class LinRequest extends BaseRequest
+class LinRequest extends Request
 {
-    public array $rules = [
-        'username' => 'required|unique:lin_user',
-        'password' => 'required',
-        'nickname' => 'required',
-        'old_password' => 'required|current_password:admin',
-        'new_password' => 'required',
-        'email' => 'email',
-        'confirm_password' => 'required',
-        'info' => 'required',
-        'name' => 'required',
-        'permission_ids' => 'array',
-        'group_id' => 'required',
-        'group_ids' => 'array',
-    ];
-    public array $scene = [
-        //更新自己密码
-        'updatePassword' => ['old_password', 'new_password', 'confirm_password'],
-        //创建权限组
-        'createGroup' => ['info', 'name', 'permission_ids'],
-        //更新权限组
-        'updateGroup' => ['info', 'name'],
-        //更新权限组对应权限
-        'dispatchPermissions' => ['group_id', 'permission_ids'],
-        //添加用户
-        'register' => ['username', 'password', 'confirm_password', 'email', 'group_ids'],
-        //修改用户密码
-        'changeUserPassword' => ['new_password', 'confirm_password'],
-        //更新用户
-        'updateUser' => ['group_ids'],
+    public function rules(): array
+    {
+        return match (request()->route()->getActionMethod()) {
+            'updatePassword' => [
+                'old_password' => 'required|current_password:admin',
+                'new_password' => 'required',
+                'confirm_password' => 'required',
+            ],
+            'createGroup' => [
+                'info' => 'required',
+                'name' => 'required',
+                'permission_ids' => 'array',
+            ],
+            'updateGroup' => [
+                'info' => 'required',
+                'name' => 'required',
+            ],
+            'dispatchPermissions' => [
+                'permission_ids' => 'array',
+                'group_id' => 'required',
+            ],
+            'register' => [
+                'username' => 'required|unique:lin_user',
+                'password' => 'required',
+                'confirm_password' => 'required',
+                'email' => 'email',
+                'group_ids' => 'array',
+            ],
+            'changeUserPassword' => [
 
-    ];
-
+                'password' => 'required',
+                'confirm_password' => 'required',
+            ],
+            'updateUser' => [
+                'group_ids' => 'array',
+            ],
+            default => [],
+        };
+    }
 }

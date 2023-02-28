@@ -37,5 +37,4 @@ class InstallCommand extends Command
         $this->callSilent('storage:link');
         $this->info('安装成功');
     }
-
 }

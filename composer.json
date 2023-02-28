@@ -9,13 +9,15 @@
         }
     ],
     "require": {
-        "laravel/framework": "^9.0",
-        "laravel/sanctum": "^2.14",
-        "pyjhyssc/laravel_api": "^1.0"
+        "laravel/sanctum": "^3.2"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^8.0",
+        "laravel/pint": "^1.6"
     },
     "autoload": {
         "psr-4": {
-            "Lincms\\": "src"
+            "Lincms\\": "src/"
         }
     },
     "extra": {
