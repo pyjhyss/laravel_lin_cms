@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class CreateLinPermissionTable extends Migration
@@ -20,7 +21,7 @@ class CreateLinPermissionTable extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
-        \Illuminate\Support\Facades\DB::statement("ALTER TABLE `lin_permission` COMMENT '权限表'");
+        DB::statement("ALTER TABLE `lin_permission` COMMENT '权限表'");
     }
 
     /**

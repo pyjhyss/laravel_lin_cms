@@ -6,40 +6,36 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Lincms\Common\Api;
 use Lincms\Models\LinFile;
 use Lincms\Models\LinGroup;
-use Lincms\Models\LinLog;
 use Lincms\Models\LinPermission;
 use Lincms\Models\LinUser;
 use Lincms\Requests\LinRequest;
-use Pyjhyssc\Requests\BaseRequest;
 
 class CmsController extends LinController
 {
-    public function login(BaseRequest $request)
+    public function login(Request $request)
     {
         $validate = [
             'username' => 'required',
-            'password' => 'required'
+            'password' => 'required',
         ];
         $request->validate($validate);
 
         $param = $request->all();
         $user = LinUser::query()->where('username', $param['username'])->first();
 
-        if (!$user) {
-            return $this->failed('用户不存在', 401);
+        if (! $user) {
+            return Api::failed('用户不存在', 401);
         }
-        if (!Hash::check($param['password'], $user->password)) {
-            return $this->failed('密码错误', 401);
+        if (! Hash::check($param['password'], $user->password)) {
+            return Api::failed('密码错误', 401);
         }
 
         $token = $user->createToken('admin');
 
-        $msg = $user['username'] . '登陆成功获取了令牌';
-        LinLog::add($msg, $user);
-
-        return ['access_token' => $token->plainTextToken];
+        return Api::json(['access_token' => $token->plainTextToken]);
     }
 
     //查询自己拥有的权限
@@ -47,23 +43,18 @@ class CmsController extends LinController
     {
         $user = $request->user();
         $permission = [];
-        LinPermission::select('id', 'name as permission', 'module')
+        LinPermission::query()->select('id', 'name as permission', 'module')
             ->get()
-            ->filter(
-                function ($v) use ($user) {
-                    if ($user->is_admin) return true;
-                    return $user->hasPermission($v);
-                }
-            )
+            ->filter(fn ($item) => $user->is_admin || $user->hasPermission($item))
             ->groupBy('module')
             ->each(function ($v, $k) use (&$permission) {
                 $permission[] = [$k => $v];
             });
 
-
         $user['permissions'] = $permission;
         $user['admin'] = $user['is_admin'];
-        return $user;
+
+        return Api::json($user);
     }
 
     //更新自己密码
@@ -80,7 +71,8 @@ class CmsController extends LinController
 
         $user->password = bcrypt($param['new_password']);
         $user->save();
-        return $this->message('密码更新成功');
+
+        return Api::message('密码更新成功');
     }
 
     //更新自己
@@ -89,15 +81,17 @@ class CmsController extends LinController
         $param = $request->only(['nickname', 'avatar']);
         $user = $request->user();
         $user->fill($param)->save();
-        return $this->message('更新成功');
+
+        return Api::message('更新成功');
     }
 
     //查询自己信息
     public function getInformation(Request $request)
     {
         $user = $request->user();
-        $user->groups;
-        return $user;
+        $user->load('groups');
+
+        return Api::json($user);
     }
 
     //查询所有用户
@@ -109,9 +103,8 @@ class CmsController extends LinController
         $data['total'] = $list['total'];
         $data['groups'] = $list['total'];
 
-        return $data;
+        return Api::json($data);
     }
-
 
     //用户添加
     public function register(LinRequest $request, LinUser $user)
@@ -124,7 +117,7 @@ class CmsController extends LinController
             $user->groups()->sync($param['group_ids']);
         }
 
-        return $this->message('注册成功');
+        return Api::message('注册成功');
     }
 
     //用户更新
@@ -134,7 +127,7 @@ class CmsController extends LinController
         $user = LinUser::query()->findOrFail($id);
         $user->groups()->sync($group_ids);
 
-        return $this->message('更新用户成功');
+        return Api::message('更新用户成功');
     }
 
     //修改用户密码
@@ -142,11 +135,12 @@ class CmsController extends LinController
     {
         $user = LinUser::query()->findOrFail($id);
         if ($user['is_admin']) {
-            return $this->failed('无法修改管理员用户');
+            return Api::failed('无法修改管理员用户');
         }
         $password = $request->input('new_password');
         LinUser::query()->where('id', $id)->update(['password' => bcrypt($password)]);
-        return $this->message('密码修改成功');
+
+        return Api::message('密码修改成功');
     }
 
     //删除用户
@@ -154,22 +148,23 @@ class CmsController extends LinController
     {
         $user = LinUser::query()->findOrFail($id);
         if ($user['is_admin']) {
-            return $this->failed('无法删除管理员用户');
+            return Api::failed('无法删除管理员用户');
         }
         $user->delete();
-        return $this->message('删除成功');
+
+        return Api::message('删除成功');
     }
 
     //查询所有可分配的权限
     public function getAllPermissions()
     {
-        return LinPermission::all()->groupBy('module');
+        return Api::json(LinPermission::all()->groupBy('module'));
     }
 
     //查询所有权限组
     public function getAllGroup()
     {
-        return LinGroup::all();
+        return Api::json(LinGroup::all());
     }
 
     //新建权限组
@@ -180,7 +175,8 @@ class CmsController extends LinController
         if ($permissionIds) {
             $group->permission()->sync($permissionIds);
         }
-        return $this->message('新建分组成功');
+
+        return Api::message('新建分组成功');
     }
 
     //查询一个权限组及其权限
@@ -190,7 +186,8 @@ class CmsController extends LinController
 
         $res = $data->toArray();
         $res['permissions'] = $data->permission;
-        return $res;
+
+        return Api::json($res);
     }
 
     //删除多个权限
@@ -200,7 +197,7 @@ class CmsController extends LinController
         $data = LinGroup::query()->findOrFail($param['group_id']);
         $data->permission()->detach($param['permission_ids']);
 
-        return $this->message('删除权限成功');
+        return Api::message('删除权限成功');
     }
 
     //分配多个权限
@@ -210,14 +207,15 @@ class CmsController extends LinController
         $data = LinGroup::query()->findOrFail($param['group_id']);
         $data->permission()->attach($param['permission_ids']);
 
-        return $this->message('添加权限成功');
+        return Api::message('添加权限成功');
     }
 
     //删除一个权限组
     public function deleteGroup($id)
     {
         LinGroup::destroy($id);
-        return $this->message('删除分组成功');
+
+        return Api::message('删除分组成功');
     }
 
     //更新一个权限组
@@ -226,18 +224,19 @@ class CmsController extends LinController
         $model = LinGroup::query()->findOrFail($id);
         $param = $request->only(['name', 'info']);
         $model->fill($param)->save();
-        return $this->message('更新分组成功');
+
+        return Api::message('更新分组成功');
     }
 
     //上传
     public function upload(Request $request)
     {
-        if (!$files = $request->file()) {
-            return $this->failed('没有上传文件');
+        if (! $files = $request->file()) {
+            return Api::failed('没有上传文件');
         }
         $arr = [];
         foreach ($files as $key => $file) {
-            $path = Storage:: disk('public')->putFile('/', $file);
+            $path = Storage::disk('public')->putFile('/', $file);
             $fileMd5 = md5_file($file->path());
 
             $extension = $file->extension();
@@ -249,16 +248,14 @@ class CmsController extends LinController
                 'size' => $file->getSize(),
                 'md5' => $fileMd5,
             ];
-            if (!LinFile::query()->where(['md5' => $fileMd5])->first()) {
+            if (! LinFile::query()->where(['md5' => $fileMd5])->first()) {
                 LinFile::query()->create($data);
             }
-            $data['key'] = $path;
+            $data['key'] = $key;
             $data['url'] = asset(Storage::url($path));
             $arr[] = $data;
-
         }
 
         return $arr;
     }
-
 }

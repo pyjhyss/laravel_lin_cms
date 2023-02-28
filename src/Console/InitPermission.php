@@ -22,24 +22,17 @@ class InitPermission extends Command
      */
     protected $description = '初始化数据库';
 
-    /**
-     * Execute the console command.
-     *
-     * @return void
-     */
     public function handle()
     {
         $this->InitPermissionS();
-
     }
-
 
     public function InitPermissionS()
     {
         $this->comment('开始更新');
         $config = config('permission.permission');
-        if (!$config) {
-            $req = require(__DIR__ . '/../../config/permission.php');
+        if (! $config) {
+            $req = require __DIR__.'/../../config/permission.php';
             $config = $req['permission'];
         }
         $data = [];
@@ -58,5 +51,4 @@ class InitPermission extends Command
         LinPermission::query()->insert($data);
         $this->info('更新成功');
     }
-
 }

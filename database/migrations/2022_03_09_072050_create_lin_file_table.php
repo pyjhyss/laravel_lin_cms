@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class CreateLinFileTable extends Migration
@@ -24,7 +25,7 @@ class CreateLinFileTable extends Migration
             $table->softDeletes()->comment('软删除');
             $table->timestamps();
         });
-        \Illuminate\Support\Facades\DB::statement("ALTER TABLE `lin_file` COMMENT '文件表'");
+        DB::statement("ALTER TABLE `lin_file` COMMENT '文件表'");
     }
 
     /**
